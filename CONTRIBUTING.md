@@ -14,7 +14,7 @@ Thank you for helping. This project handles health data, so a few rules matter m
 
 ## Data
 
-- The source data is the Excel squad's **Clean Handoff Pack v2**, published as a [release](https://github.com/AMR-Playbook/.github/releases/tag/excel-handoff-v2). Download it. **Don't commit it, or any data file, to a repository.**
+- The source data is the Excel squad's **Clean Handoff Pack v2**. It is committed once, to `kaduna-amr-sql/seed/`, as the single agreed input, and is also available as a [release download](https://github.com/AMR-Playbook/.github/releases/tag/excel-handoff-v2). Don't commit copies of it, or any other data file, anywhere else.
 - Sheets `4_ISOLATES` and `5_AST_RESULTS` are read-only source. Load them, don't change them.
 - Never commit passwords, connection strings or `.env` files.
 
@@ -30,11 +30,14 @@ Thank you for helping. This project handles health data, so a few rules matter m
 
 | Label | Meaning |
 |---|---|
-| `must-have` | Required for the project to be finished |
-| `answer-key` | Output must match sheet `11_ANSWER_KEY` |
-| `privacy` | Touches patient privacy or access control |
-| `clinical-safety` | Could mislead a clinician if done wrongly |
-| `documentation` | The deliverable is a document |
-| `good first issue` | A sensible place to start |
+| `priority: P0` | Blocks other people. Do this first. |
+| `priority: P1` | Needed for the four-week goal. |
+| `priority: P2` | Do it if the must-haves are signed off. |
+| `week-1` … `week-4` | Foundation · Load and first answers · Analysis · Build, test and present |
+| `type: schema` / `type: data` / `type: analysis` / `type: modelling` / `type: dashboard` / `type: docs` | The kind of work |
+| `answer-key` | Output must match the agreed reference numbers in sheet 11 |
+| `privacy` | Touches patient data or access control |
+| `needs-review` | Reviewed by someone from another squad before closing |
 
-Milestones mark the two checkpoints: **Check 1 — Three tools, one number** and **Check 2 — Rebuild from zero & final demo**.
+**Checkpoint 1** (end of week 2): the three tools agree on the answer key.
+**Checkpoint 2** (end of week 4): someone who did not build the system can rebuild it from the documentation alone.

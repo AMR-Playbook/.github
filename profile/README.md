@@ -1,127 +1,129 @@
-<div align="center">
-
 # Kaduna AMR Watch
 
 ### Which antibiotics still work in Kaduna?
 
-An open, carefully documented antimicrobial resistance (AMR) surveillance pipeline for Kaduna State, Nigeria.
-It turns hospital laboratory results into a local **antibiogram**, so clinicians can choose empiric therapy with evidence instead of guesswork.
+A child arrives at a Kaduna hospital with a high fever. The doctor suspects the infection is in the blood. A culture is sent to the laboratory, but the result will take days, and the family may not be able to afford it at all. The child cannot wait. The doctor must choose an antibiotic **today**.
 
-![Status](https://img.shields.io/badge/status-pilot%20build-1f6feb?style=flat-square)
-![Data](https://img.shields.io/badge/current%20data-synthetic%20practice-d29922?style=flat-square)
-![Method](https://img.shields.io/badge/method-first%20isolate%20%C2%B7%20n%E2%89%A530-2ea043?style=flat-square)
-![Privacy](https://img.shields.io/badge/privacy-NDPA%202023-8250df?style=flat-square)
+Which one? If the bacteria in that hospital are already resistant to the usual drug, the child receives a medicine that does nothing while the infection advances. The doctor is not careless. The doctor simply has no local data showing which antibiotics still work in that hospital, this year.
 
-</div>
-
-> [!IMPORTANT]
-> **All results in this organisation currently come from synthetic practice data.** They show how the system works, not what is happening in Kaduna. Nothing here is a clinical finding, and nothing here replaces clinical judgement. Real findings will come only from approved hospital data under ethics approval.
+**This organisation exists to close that gap.**
 
 ---
 
-## The clinical problem
+## The evidence gap we are addressing
 
-A child arrives at a Kaduna hospital with a high fever and suspected bloodstream infection. A blood culture takes days, and the family may not be able to pay for it. The clinician has to choose an antibiotic **today**.
-
-If local bacteria are already resistant to the usual drug, that choice fails while the infection progresses. The clinician isn't being careless. They simply have **no current, local resistance data** for their hospital.
-
-| What we know | Figure |
+| | |
 |---|---|
-| Deaths in Nigeria directly attributable to bacterial AMR, 2019 | **64,500** |
-| Deaths in Nigeria associated with bacterial AMR, 2019 | **263,400** |
-| Published hospital resistance studies found for Kaduna | **1** (Zaria, 2021) |
-| Kaduna facility-years (6 hospitals × 7 years) with no public resistance data | **34 of 42 (81%)** |
+| Deaths in Nigeria directly caused by resistant bacteria (2019) | **64,500** |
+| Deaths in Nigeria where resistant bacteria were involved (2019) | **263,400** |
+| Published hospital resistance studies found for Kaduna State | **1** (Zaria, Sep–Dec 2021) |
+| Kaduna facility-years with no public resistance data (6 hospitals x 7 years) | **34 of 42 (81%)** |
+| UK Fleming Fund, a major AMR surveillance funder, final phase ended | **March 2026** |
 
-<sub>Death estimates: Global Research on Antimicrobial Resistance (GRAM) / IHME, 2019. Coverage figures: project evidence review. Sources are kept in the project evidence workbook and are being independently verified.</sub>
+Sources are catalogued with full citations in the project's evidence register. Every figure traces to a named source.
 
-## What we are building
+---
+
+## What we build
+
+A **cumulative antibiogram**: a table showing, for each organism, the percentage of isolates still susceptible to each antibiotic, broken down by hospital, specimen and year. Plus the system that produces it continuously rather than once.
 
 ```mermaid
 flowchart LR
-    LAB["🧫 Hospital lab results<br/><i>now: synthetic practice data</i><br/><i>later: approved registers</i>"]
-    XL["📗 Excel<br/>clean · validate<br/>manual antibiogram"]
-    SQL["🗄️ PostgreSQL<br/>store safely · deduplicate<br/>first-isolate rule"]
-    PY["🐍 Python<br/>reproduce · trends with CIs<br/>risk model"]
-    BI["📊 Power BI<br/>clinical antibiogram<br/>management view"]
-    USE["🩺 Clinicians · pharmacists<br/>hospital managers<br/>Ministry of Health"]
+    A["Hospital laboratory<br/>culture and sensitivity results"] --> B["Cleaning<br/>and validation"]
+    B --> C[("Database<br/>PostgreSQL")]
+    C --> D["Analysis<br/>Python"]
+    C --> E["Dashboards<br/>Power BI"]
+    D --> E
+    E --> F["Clinicians<br/>choosing therapy"]
+    E --> G["Hospital managers<br/>and Ministry of Health"]
 
-    LAB --> XL --> SQL --> PY --> BI --> USE
-    SQL --> BI
-    BI -. "a number looks wrong" .-> SQL
-    SQL -. "trace it back" .-> XL
-
-    classDef done fill:#dafbe1,stroke:#2ea043,color:#0a3d1a
-    classDef build fill:#ddf4ff,stroke:#1f6feb,color:#0a2a5c
-    classDef people fill:#fff8c5,stroke:#d29922,color:#4d3800
-    class XL done
-    class SQL,PY,BI build
-    class USE people
+    style A fill:#e8eef6,stroke:#1f3a5f,color:#1f3a5f
+    style C fill:#1f3a5f,stroke:#1f3a5f,color:#ffffff
+    style F fill:#1d6f42,stroke:#1d6f42,color:#ffffff
+    style G fill:#1d6f42,stroke:#1d6f42,color:#ffffff
 ```
 
-The core product is a **cumulative antibiogram**: for each organism, the percentage of isolates susceptible to each antibiotic, by hospital, specimen and year. Every percentage is shown with its count.
+---
 
-## Methods we hold ourselves to
+## Repositories
 
-| Standard | What it means in practice |
+| Repository | What lives there |
 |---|---|
-| **First-isolate rule** | Only the first isolate of each organism per patient per period is counted, so one very sick patient can't dominate the results (CLSI M39 approach). |
-| **Minimum 30 isolates** | Results based on fewer than 30 isolates are greyed out and flagged as unreliable. |
-| **No percentage without its count** | 80% of 5 isolates and 80% of 500 isolates are never shown the same way. |
-| **Three tools, one number** | Excel, SQL and Python each rebuild the headline figures independently. If they disagree, work stops until the cause is found. |
-| **Uncertainty is reported** | Trends carry 95% Wilson confidence intervals. "Rising" is claimed only when a statistical test supports it. |
-| **WHO AWaRe stewardship** | Antibiotics are shown with their Access, Watch or Reserve group, so a working Access drug is visibly preferred. |
-| **Breakpoint awareness** | The guideline (CLSI or EUCAST, with year) is stored with every result, because they can't be pooled blindly. |
-| **Models never use hindsight** | Risk models use only what a clinician knows at the moment of prescribing, and are evaluated on later years than they were trained on. |
+| [`kaduna-amr-sql`](https://github.com/AMR-Playbook/kaduna-amr-sql) | **Database.** The schema, the loading process, the privacy controls and the reporting views. Everything downstream reads from here. |
+| [`kaduna-amr-python`](https://github.com/AMR-Playbook/kaduna-amr-python) | **Pipeline.** Reproducible analysis in Python: antibiogram rebuild, trend statistics with uncertainty, and the resistance risk model. |
+| [`kaduna-amr-powerbi`](https://github.com/AMR-Playbook/kaduna-amr-powerbi) | **Dashboards.** Power BI data model, measures, the clinical antibiogram screen and the management view. |
 
-## Safeguards
+Data cleaning is done in Excel and has no repository. The cleaned workbook is committed to `kaduna-amr-sql/seed/` as the single agreed input, and is also available as a [release download](https://github.com/AMR-Playbook/.github/releases/tag/excel-handoff-v2).
 
-- 🔒 **Patient privacy.** No names, phone numbers or addresses ever enter the system. Patient identifiers are hashed before loading. We follow the **Nigeria Data Protection Act 2023** and the conditions of any ethics approval.
-- 🏷️ **Synthetic is never evidence.** Every chart, table and slide built on practice data is labelled `SYNTHETIC`.
-- 🤝 **No shaming hospitals.** A hospital sees its own results first, as a tool for improvement.
-- 🩺 **Clinical decisions belong to clinicians.** Our outputs inform prescribing. They never replace clinical judgement, and we never give medical advice.
+---
 
-## Progress
+## Data governance
+
+**The data currently in this organisation is synthetic.** It was generated to let the team build and test the system before real hospital data is available. It describes invented patients in four fictional hospitals. It is practice material and must never be presented as a finding about Kaduna.
+
+Every chart, table and dashboard built from it carries a SYNTHETIC label.
+
+When real data arrives, the following apply without exception:
+
+- Patient-level data enters only after written hospital agreement and ethics approval from the facility and the Kaduna State Ministry of Health.
+- No names, telephone numbers or addresses are stored. Patient identifiers are hashed before loading.
+- Processing follows the Nigeria Data Protection Act 2023.
+- Data about a hospital is shared with that hospital first, as a tool for improvement, never for comparison in public.
+- **Our dashboards inform clinical decisions. They never replace clinical judgement, and this organisation does not give medical advice.**
+
+---
+
+## How a result becomes trustworthy here
+
+Every headline number is rebuilt independently in three tools. If the database, the Python pipeline and the Power BI model disagree, work stops until the cause is found.
 
 ```mermaid
-flowchart LR
-    E["📗 Excel<br/><b>Complete</b>"] --> C1{{"Check 1<br/>three tools, one number"}}
-    S["🗄️ SQL<br/>in progress"] --> C1
-    P["🐍 Python<br/>in progress"] --> C1
-    C1 --> B["📊 Power BI<br/>in progress"]
-    B --> C2{{"Check 2<br/>rebuild from zero · final demo"}}
+flowchart TD
+    AK["Agreed answer key<br/>25 reference numbers"]
+    SQL["Database view"] --> CHECK{"Do all three agree?"}
+    PY["Python pipeline"] --> CHECK
+    BI["Power BI measure"] --> CHECK
+    AK --> CHECK
+    CHECK -->|Yes| PUB["Published to the dashboard"]
+    CHECK -->|No| STOP["Stop. Find the cause.<br/>Nothing ships."]
 
-    classDef done fill:#dafbe1,stroke:#2ea043,color:#0a3d1a
-    classDef wip fill:#ddf4ff,stroke:#1f6feb,color:#0a2a5c
-    classDef gate fill:#fff8c5,stroke:#d29922,color:#4d3800
-    class E done
-    class S,P,B wip
-    class C1,C2 gate
+    style AK fill:#fff2cc,stroke:#b8860b,color:#5c4405
+    style PUB fill:#1d6f42,stroke:#1d6f42,color:#ffffff
+    style STOP fill:#9c1c1c,stroke:#9c1c1c,color:#ffffff
 ```
 
-| Workstream | Repository | Status |
-|---|---|---|
-| 📗 **Data cleaning & manual antibiogram** (Excel) | [Clean Handoff Pack v2](https://github.com/AMR-Playbook/.github/releases/tag/excel-handoff-v2) | ✅ **Complete** |
-| 🗄️ **Database & trusted views** (PostgreSQL) | [`kaduna-amr-sql`](https://github.com/AMR-Playbook/kaduna-amr-sql) | 🔵 In progress |
-| 🐍 **Reproducible analysis, trends & risk model** (Python) | [`kaduna-amr-python`](https://github.com/AMR-Playbook/kaduna-amr-python) | 🔵 In progress |
-| 📊 **Clinical & management dashboards** (Power BI) | [`kaduna-amr-powerbi`](https://github.com/AMR-Playbook/kaduna-amr-powerbi) | 🔵 In progress |
+No percentage is ever published without the number of isolates it was calculated from. Results based on fewer than 30 isolates are marked unreliable and are not used for treatment guidance.
 
-### The Excel deliverable
+---
 
-The Excel squad's work is finished and published as a single workbook, **[Kaduna_AMR_Clean_Handoff_v2.xlsx](https://github.com/AMR-Playbook/.github/releases/tag/excel-handoff-v2)**:
+## Project timeline
 
-- **9,108** clean isolates (40 duplicate entries removed) and **94,454** susceptibility test results
-- **44** messy organism spellings mapped to **11** standard organisms, verified at 100% accuracy
-- A full data dictionary, cleaning log, quality scorecard per hospital and validated data-entry templates
-- Manual antibiograms for 2024 and 2025 with the 30-isolate rule applied
-- An **answer key** that the SQL, Python and Power BI work must each reproduce
-- An audit of the squad's own files that found and fixed **16 errors** before handoff
+```mermaid
+gantt
+    title Four-week build
+    dateFormat YYYY-MM-DD
+    axisFormat Week %W
+    section Database
+    Schema and seed data      :a1, 2026-10-19, 7d
+    Load, views and roles     :a2, after a1, 7d
+    section Pipeline
+    Scaffolding and loader    :b1, 2026-10-19, 7d
+    Antibiogram and tests     :b2, after b1, 7d
+    Statistics and model      :b3, after b2, 7d
+    section Dashboards
+    Data model and measures   :c1, after b1, 7d
+    Clinical screen           :c2, after c1, 7d
+    Testing and handover      :c3, after c2, 7d
+```
 
-## Get involved
+**Checkpoint 1** (end of week 2): the three tools agree on the answer key.
+**Checkpoint 2** (end of week 4): someone who did not build the system can rebuild it from the documentation alone.
 
-Each repository has a short list of open issues, labelled by area and checkpoint. Start with the repository README, then read [`CONTRIBUTING.md`](https://github.com/AMR-Playbook/.github/blob/main/CONTRIBUTING.md).
+---
 
-Hospitals, laboratory scientists, clinicians and pharmacists in Kaduna State who would like to discuss data partnerships are very welcome. Please open a discussion or contact the maintainers.
+## For clinicians and health partners
 
-<div align="center">
-<sub>Built in Kaduna. Synthetic data for practice, real data only with approval. Every number with its count.</sub>
-</div>
+If you work in a Kaduna facility and would like to discuss contributing laboratory data, or you would like to review what we produce before it reaches any ward, please open an issue in the relevant repository or contact the project lead.
+
+We would rather be corrected early by a microbiologist than be confidently wrong in front of a patient.
